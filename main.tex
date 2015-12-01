@@ -54,7 +54,64 @@
 
 \section{Introduction}
 
-\section{Motivation \& Background}
+\section{Overview}
+
+In this section, we walk the reader through an overview of our approach with reference to the code in Figure \ref{fig:jquery-extracted}, taken from the jQuery framework, for illustration purposes. [[ Can we say more about the example? ]]
+
+\subsection{The Problem and Its Symptoms}
+
+Static program analysis is challenged, by its very definition, by dynamic constructs like reflection. This is among the greatest challenges in JavaScript analysis, where reflective capabilities --- such as enumeration over, and access to, an object's properties --- are baked into the core syntax. Examples of this, in Figure \ref{fig:jquery-extracted}, are the {\sf for} loop iterating over property identifiers at lines XXX, YYY and ZZZ. Other challenging constructs include closures, variadic function, prototype-chain lookup, etc.
+
+These (and other) challenges have significant impact on the precision of Andersen-style analysis of real-world JavaScript programs. In the absence of special treatment for challenging constructs, the analysis becomes overly conservative, losing track of correlations that are critical for acceptable precision. For the code in Figure \ref{fig:jquery-extracted}, for instance, the analysis would propagate pointers across every pair of properties in {\sf source} and {\sf target}, which is detrimental to its precision.
+
+Importantly, however, at the lower level of the fixpoint system computing the points-to solution, these challenges are all abstracted into the same symptom: excessively large points-to sets due to infeasible pointer flows. As an illustration, 
+we refer the reader to Figure \ref{fig:pts-growth}, which depicts the evolution of the points-to graph (measured as the number of points-to edges) for a simple client of jQuery v1.6.1 as a function of fixpoint iterations.
+
+In the figure, there are two trend lines. The red ``linear'' line corresponds to 1-CFA analysis with argument sensitivity, and the other line to 0/1-CFA. As 0/1-CFA is more coarse, important dimensions of precision are lost, and the analysis fails to complete within a time budget of 10 minutes. Comparatively, the 1-CFA analysis finishes in under 5 seconds.
+
+These behaviors are reflected in the trend lines. While the 1-CFA points-to graph grows at a steady rate, the 0-CFA line exhibits a jerky behavior with step-like jumps. These correspond to the symptoms mentioned above: large points-to sets reaching wide regions in the points-to graph.
+
+\subsection{Step I: Diagnosis}
+
+Our first observation, enabling diagnostic analysis, concerns the detemrmination whether a given pointer variable (or pointer key) {\sf ptr} is conducive to accuracy loss. For {\sf ptr} to qualify as such, two conditions should be met:
+\begin{enumerate}
+	\item {\sf ptr} is (transitively) assigned to a large number of other pointer keys.
+	\item The points-to set of {\sf ptr} is large.
+\end{enumerate}
+By the first condition, {\sf ptr} has wide reach within the fixpoint system. By the second condition, the impact of its wide reach is significant.
+
+As an example, ... [[ point to motivating example and show a fragment of points-to graph ]].
+
+To enforce the diagnostic conditions above, we instrument the fixpoint system to track flow of pointer keys. Given a dataflow equation $e$ propagating points-to elements between pointer keys {\sf x} and {\sf y}, where {\sf y} has points-to set $S$, we instrument the points-to edge ${\sf y} \mapsto S$ to include {\sf x}: ${\sf y} \stackrel{{\sf x}}{\mapsto} S$.
+
+Tracking pointer keys as edge labels addresses the first condition above. Evaluating the second condition is straightforward. Deriving the size of the points-to set of a given pointer key is immediate from the points-to graph.
+
+\subsection{Step II: Remediation}
+
+Having identified precision bottlenecks, in the form of pointer variables requiring additional sensitivity, we turn to the remediation problem. We propose a heuristic, based on (i) a parametric library of sensitivity policies as well as (ii) a dynamic analysis to simulate their effects w.r.t. concrete runtime states and compare between them, to recommend to the analysis designer how to refine the analysis.
+
+\paragraph{Sensitivity Policies.} The problem of imprecision in JavaScript points-to graphs has been observed, and addressed, in various studies. Beyond that, there are general schemes to add sensitivity to a propagation-based call graph. In this paper, we focus on the following sensitivity policies in particular:
+\begin{itemize}
+	\item XXX
+	\item YYY
+	\item ZZZ
+	\item ...
+\end{itemize}
+
+\paragraph{Recommendation Algorithm.} Given the library $\{ s_1,\ldots, s_n \}$ of sensitivity policies, the recommendation which (type of) sensitivity to add is based on simulating the effects of the different policies $s_i$ w.r.t. a fully concrete points-to graph computed dynamically. Policy $s$ is considered better than $s'$ if XXX.
+
+The motivation for using dynamic analysis is to be able to quantify the precision loss, or ambiguity, introduced by a given policy. That is, we can reason fully precisely about the concrete points-to facts that are smushed together due to a given policy.
+
+To compute the points-to graph dynamically, we instrument the JavaScript program. This is done via XXX. The instrumented program is, on average, xYYY slower compared to the original version. We handle XXX...
+
+For the example in Figure \ref{fig:jquery-extracted}, our solution correctly picks ...
+
+
+
+
+proceeds by instrumenting the subject program to record, at runtime, the concrete --- and thus fully precise --- points-to graph $G^c$. The question of which sensitivity to recommend to the analysis designer then 
+
+
 
 \subsection{Motivating Example}
 In this section, we would like to use a code example (or a series of examples; see below) to demonstrate the difficulties to (manually) find the performance bottleneck of a static analysis. For example, Figure \ref{fig:jquery-orig} shows the original {\tt extend} function of jQuery whose behavior is not easy to understand; moreover, due to its usage of complicated program structures (e.g., recursion, function variadicity), it is difficult for an analysis to accurately model the results of this function (confirmed in \cite{}). In \cite{}, the authors had to manually transform this function to simplify its structure, resulting in the code in Figure \ref{fig:jquery-modified}. Nevertheless, the transformed code, in and of itself, is still insufficient for a field-sensitive analysis to complete analyzing simple jQuery applications. Therefore, the authors of \cite{} designed an automatic function extraction algorithm (correlation extraction) and used argument sensitivity to improve the performance and precision of JavaScript points-to analysis. The code that is actually being analyzed by the argument-sensitive analysis is presented in Figure \ref{fig:jquery-extracted}. Overall, the take-away message shall be: it is difficult to locate the analysis bottleneck and it is also difficult to find a solution to improve the analysis. This series of examples strongly support the above statement: (1) among almost 9,000 lines of code of jQuery library, it usually is clueless to know that one particular function results in the analysis performance bottleneck (without investigating the code); (2) even if the analysis designer is able to locate this function as the bottleneck, it is difficult to tell which program structure or if it is the combination of several program structures that result in bad analysis behavior, thus making it difficult to develop new technology to improve the analysis; (3) even if the analysis designer is able to (manually) abstract away several challenges (e.g., the transformed function in Figure \ref{fig:jquery-modified}), and wants to apply the more precise technique whole program (e.g., argument sensitivity), this may in turn results in overhead because the other portion of the program may not benefit from the more advanced technique (although this particular function will significantly benefit from argument sensitivity). ({\bf Comment from Shiyi: despite that I think this is a good series examples as motivation, we cannot afford to use too much space for the codes; simplify the code, especially Figure 1 (included the complete code for your reference), as the ECOOP 12 paper did; or use one whole example to demonstrate what we want to express. Also, note that our technique does not automatically fixes the issues discussed in (1) and (2) above, while we do locate the bottleneck function and apply the advanced techniques, thus solving problem (3) above.}).
