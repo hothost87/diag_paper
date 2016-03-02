@@ -1,164 +1,221 @@
-\documentclass[a4paper,UKenglish]{lipics}
-%This is a template for producing LIPIcs articles. 
-%See lipics-manual.pdf for further information.
-%for A4 paper format use option "a4paper", for US-letter use option "letterpaper"
-%for british hyphenation rules use option "UKenglish", for american hyphenation rules use option "USenglish"
-% for section-numbered lemmas etc., use "numberwithinsect"
- 
-\usepackage{microtype}%if unwanted, comment out or use option "draft"
+% This is "sig-alternate.tex" V2.1 April 2013
+% This file should be compiled with V2.5 of "sig-alternate.cls" May 2012
+%
+% This example file demonstrates the use of the 'sig-alternate.cls'
+% V2.5 LaTeX2e document class file. It is for those submitting
+% articles to ACM Conference Proceedings WHO DO NOT WISH TO
+% STRICTLY ADHERE TO THE SIGS (PUBS-BOARD-ENDORSED) STYLE.
+% The 'sig-alternate.cls' file will produce a similar-looking,
+% albeit, 'tighter' paper resulting in, invariably, fewer pages.
+%
+% ----------------------------------------------------------------------------------------------------------------
+% This .tex file (and associated .cls V2.5) produces:
+%       1) The Permission Statement
+%       2) The Conference (location) Info information
+%       3) The Copyright Line with ACM data
+%       4) NO page numbers
+%
+% as against the acm_proc_article-sp.cls file which
+% DOES NOT produce 1) thru' 3) above.
+%
+% Using 'sig-alternate.cls' you have control, however, from within
+% the source .tex file, over both the CopyrightYear
+% (defaulted to 200X) and the ACM Copyright Data
+% (defaulted to X-XXXXX-XX-X/XX/XX).
+% e.g.
+% \CopyrightYear{2007} will cause 2007 to appear in the copyright line.
+% \crdata{0-12345-67-8/90/12} will cause 0-12345-67-8/90/12 to appear in the copyright line.
+%
+% ---------------------------------------------------------------------------------------------------------------
+% This .tex source is an example which *does* use
+% the .bib file (from which the .bbl file % is produced).
+% REMEMBER HOWEVER: After having produced the .bbl file,
+% and prior to final submission, you *NEED* to 'insert'
+% your .bbl file into your source .tex file so as to provide
+% ONE 'self-contained' source file.
+%
+% ================= IF YOU HAVE QUESTIONS =======================
+% Questions regarding the SIGS styles, SIGS policies and
+% procedures, Conferences etc. should be sent to
+% Adrienne Griscti (griscti@acm.org)
+%
+% Technical questions _only_ to
+% Gerald Murray (murray@hq.acm.org)
+% ===============================================================
+%
+% For tracking purposes - this is V2.0 - May 2012
 
-%\graphicspath{{./graphics/}}%helpful if your graphic files are in another directory
+\documentclass{sig-alternate-05-2015}
 
-\bibliographystyle{plain}% the recommended bibstyle
+\usepackage{array}
+\newcolumntype{L}[1]{>{\raggedright\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{C}[1]{>{\centering\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\let\newline\\\arraybackslash\hspace{0pt}}m{#1}}
+\usepackage{multirow}
 
-% Author macros::begin %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\title{A Diagnostic Approach for Static Program Analysis}
-\titlerunning{Diagnostic Analysis} %optional, in case that the title is too long; the running title should fit into the top page column
+\usepackage{amssymb}
+%\setcounter{tocdepth}{3}
+\usepackage{graphicx}
 
-\author{}
-%\author[2]{Joan R. Access}
-%\affil[1]{Dummy University Computing Laboratory\\
-%  Address, Country\\
-%  \texttt{open@dummyuni.org}}
-%\affil[2]{Department of Informatics, Dummy College\\
-%  Address, Country\\
-%  \texttt{access@dummycollege.org}}
-%\authorrunning{J.\,Q. Open and J.\,R. Access} %mandatory. First: Use abbreviated first/middle names. Second (only in severe cases): Use first author plus 'et. al.'
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{algorithmic}
+\usepackage{algorithm}
 
-%\Copyright{John Q. Open and Joan R. Access}%mandatory, please use full first names. LIPIcs license is "CC-BY";  http://creativecommons.org/licenses/by/3.0/
+%\usepackage{algpseudocode}
 
-%\subjclass{Dummy classification -- please refer to \url{http://www.acm.org/about/class/ccs98-html}}% mandatory: Please choose ACM 1998 classifications from http://www.acm.org/about/class/ccs98-html . E.g., cite as "F.1.1 Models of Computation". 
-\keywords{JavaScript, points-to analysis, debugging}% mandatory: Please provide 1-5 keywords
-% Author macros::end %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\algsetup{indent=2em}
+\usepackage[font={bf}]{caption}
+\usepackage{listings}
+\usepackage[usenames]{color}
+\usepackage{balance}
+\usepackage{subfigure}
+\usepackage{rotating}
+\newcounter{copyrightbox}
+\epstopdfsetup{suffix=}
 
-%Editor-only macros:: begin (do not touch as author)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\serieslogo{}%please provide filename (without suffix)
-%\volumeinfo%(easychair interface)
-%  {Billy Editor and Bill Editors}% editors
-%  {2}% number of editors: 1, 2, ....
-%  {Conference title on which this volume is based on}% event
-%  {1}% volume
- % {1}% issue
- % {1}% starting page number
-%\EventShortName{}
-%\DOI{10.4230/LIPIcs.xxx.yyy.p}% to be completed by the volume editor
-% Editor-only macros::end %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\definecolor{MyDarkGreen}{rgb}{0,0.5,0.13}
+\definecolor{lightgray}{rgb}{.9,.9,.9}
+\definecolor{darkgray}{rgb}{.4,.4,.4}
+\definecolor{purple}{rgb}{0.65, 0.12, 0.82}
+\definecolor{maroon}{rgb}{0.500,0.000,0.000}
+\lstset{
+% frame = single,
+numbers=left, numberstyle=\footnotesize, numbersep=10pt,
+emphstyle={\bf},
+stringstyle=\mdseries\sffamily,
+showspaces=false,
+columns=flexible,
+basicstyle=\footnotesize\ttfamily,
+showstringspaces=false,
+keywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break},
+keywordstyle=\color{black},
+ndkeywords={class, export, boolean, throw, implements, import, this},
+ndkeywordstyle=\color{black},
+identifierstyle=\color{black},
+sensitive=false,
+comment=[l]{//},
+morecomment=[s]{/*}{*/},
+commentstyle=\color{MyDarkGreen}\ttfamily\bf,
+morestring=[b]',
+escapeinside={*'}{'*},
+stringstyle=\color{green},
+}
 
 \begin{document}
 
+\renewcommand{\arraystretch}{1.5}
+
+
+% Copyright
+%\setcopyright{acmcopyright}
+%\setcopyright{acmlicensed}
+%\setcopyright{rightsretained}
+%\setcopyright{usgov}
+%\setcopyright{usgovmixed}
+%\setcopyright{cagov}
+%\setcopyright{cagovmixed}
+
+
+% DOI
+%\doi{10.475/123_4}
+
+% ISBN
+%\isbn{123-4567-24-567/08/06}
+
+%Conference
+%\conferenceinfo{PLDI '13}{June 16--19, 2013, Seattle, WA, USA}
+
+%\acmPrice{\$15.00}
+
+%
+% --- Author Metadata here ---
+%\conferenceinfo{WOODSTOCK}{'97 El Paso, Texas USA}
+%\CopyrightYear{2007} % Allows default copyright year (20XX) to be over-ridden - IF NEED BE.
+%\crdata{0-12345-67-8/90/01}  % Allows default copyright data (0-89791-88-6/97/05) to be over-ridden - IF NEED BE.
+% --- End of Author Metadata ---
+
+
+
+\title{Title}
+%\subtitle{[Extended Abstract]
+%\titlenote{A full version of this paper is available as
+%\textit{Author's Guide to Preparing ACM SIG Proceedings Using
+%\LaTeX$2_\epsilon$\ and BibTeX} at
+%\texttt{www.acm.org/eaddress.htm}}}
+%
+% You need the command \numberofauthors to handle the 'placement
+% and alignment' of the authors beneath the title.
+%
+% For aesthetic reasons, we recommend 'three authors at a time'
+% i.e. three 'name/affiliation blocks' be placed beneath the title.
+%
+% NOTE: You are NOT restricted in how many 'rows' of
+% "name/affiliations" may appear. We just ask that you restrict
+% the number of 'columns' to three.
+%
+% Because of the available 'opening page real-estate'
+% we ask you to refrain from putting more than six authors
+% (two rows with three columns) beneath the article title.
+% More than six makes the first-page appear very cluttered indeed.
+%
+% Use the \alignauthor commands to handle the names
+% and affiliations for an 'aesthetic maximum' of six authors.
+% Add names, affiliations, addresses for
+% the seventh etc. author(s) as the argument for the
+% \additionalauthors command.
+% These 'additional authors' will be output/set for you
+% without further effort on your part as the last section in
+% the body of your article BEFORE References or any Appendices.
+
+%\numberofauthors{1} %  in this sample file, there are a *total*
+% of EIGHT authors. SIX appear on the 'first-page' (for formatting
+% reasons) and the remaining two appear in the \additionalauthors section.
+%
+%\author{
+% You can go ahead and credit any number of authors here,
+% e.g. one 'row of three' or two rows (consisting of one row of three
+% and a second row of one, two or three).
+%
+% The command \alignauthor (no curly braces needed) should
+% precede each author name, affiliation/snail-mail address and
+% e-mail address. Additionally, tag each line of
+% affiliation/address with \affaddr, and tag the
+% e-mail address with \email.
+%
+
+%}
+% There's nothing stopping you putting the seventh, eighth, etc.
+% author on the opening page (as the 'third row') but we ask,
+% for aesthetic reasons that you place these 'additional authors'
+% in the \additional authors block, viz.
+%\additionalauthors{Additional authors: John Smith (The Th{\o}rv{\"a}ld Group,
+%email: {\texttt{jsmith@affiliation.org}}) and Julius P.~Kumquat
+%(The Kumquat Consortium, email: {\texttt{jpkumquat@consortium.net}}).}
+%\date{30 July 1999}
+% Just remember to make sure that the TOTAL number of authors
+% is the number that will appear on the first page PLUS the
+% number that will appear in the \additionalauthors section.
+
 \maketitle
-
 \begin{abstract}
+\end{abstract}
 
- \end{abstract}
+\input{introduction}
 
-\section{Introduction}
+\input{background}
 
-\section{Overview}
+\input{design}
 
-In this section, we walk the reader through an overview of our approach with reference to the code in Figure \ref{fig:jquery-extracted}, taken from the jQuery framework, for illustration purposes. [[ Can we say more about the example? ]]
+\input{evaluation}
 
-\subsection{The Problem and Its Symptoms}
-
-Static program analysis is challenged, by its very definition, by dynamic constructs like reflection. This is among the greatest challenges in JavaScript analysis, where reflective capabilities --- such as enumeration over, and access to, an object's properties --- are baked into the core syntax. Examples of this, in Figure \ref{fig:jquery-extracted}, are the {\sf for} loop iterating over property identifiers at lines XXX, YYY and ZZZ. Other challenging constructs include closures, variadic function, prototype-chain lookup, etc.
-
-These (and other) challenges have significant impact on the precision of Andersen-style analysis of real-world JavaScript programs. In the absence of special treatment for challenging constructs, the analysis becomes overly conservative, losing track of correlations that are critical for acceptable precision. For the code in Figure \ref{fig:jquery-extracted}, for instance, the analysis would propagate pointers across every pair of properties in {\sf source} and {\sf target}, which is detrimental to its precision.
-
-Importantly, however, at the lower level of the fixpoint system computing the points-to solution, these challenges are all abstracted into the same symptom: excessively large points-to sets due to infeasible pointer flows. As an illustration, 
-we refer the reader to Figure \ref{fig:pts-growth}, which depicts the evolution of the points-to graph (measured as the number of points-to edges) for a simple client of jQuery v1.6.1 as a function of fixpoint iterations.
-
-In the figure, there are two trend lines. The red ``linear'' line corresponds to 1-CFA analysis with argument sensitivity, and the other line to 0/1-CFA. As 0/1-CFA is more coarse, important dimensions of precision are lost, and the analysis fails to complete within a time budget of 10 minutes. Comparatively, the 1-CFA analysis finishes in under 5 seconds.
-
-These behaviors are reflected in the trend lines. While the 1-CFA points-to graph grows at a steady rate, the 0-CFA line exhibits a jerky behavior with step-like jumps. These correspond to the symptoms mentioned above: large points-to sets reaching wide regions in the points-to graph.
-
-\subsection{Step I: Diagnosis}
-
-Our first observation, enabling diagnostic analysis, concerns the detemrmination whether a given pointer variable (or pointer key) {\sf ptr} is conducive to accuracy loss. For {\sf ptr} to qualify as such, two conditions should be met:
-\begin{enumerate}
-	\item {\sf ptr} is (transitively) assigned to a large number of other pointer keys.
-	\item The points-to set of {\sf ptr} is large.
-\end{enumerate}
-By the first condition, {\sf ptr} has wide reach within the fixpoint system. By the second condition, the impact of its wide reach is significant.
-
-As an example, ... [[ point to motivating example and show a fragment of points-to graph ]].
-
-To enforce the diagnostic conditions above, we instrument the fixpoint system to track flow of pointer keys. Given a dataflow equation $e$ propagating points-to elements between pointer keys {\sf x} and {\sf y}, where {\sf y} has points-to set $S$, we instrument the points-to edge ${\sf y} \mapsto S$ to include {\sf x}: ${\sf y} \stackrel{{\sf x}}{\mapsto} S$.
-
-Tracking pointer keys as edge labels addresses the first condition above. Evaluating the second condition is straightforward. Deriving the size of the points-to set of a given pointer key is immediate from the points-to graph.
-
-\subsection{Step II: Remediation}
-
-Having identified precision bottlenecks, in the form of pointer variables requiring additional sensitivity, we turn to the remediation problem. We propose a heuristic, based on (i) a parametric library of sensitivity policies as well as (ii) a dynamic analysis to simulate their effects w.r.t. concrete runtime states and compare between them, to recommend to the analysis designer how to refine the analysis.
-
-\paragraph{Sensitivity Policies.} The problem of imprecision in JavaScript points-to graphs has been observed, and addressed, in various studies. Beyond that, there are general schemes to add sensitivity to a propagation-based call graph. In this paper, we focus on the following sensitivity policies in particular:
-\begin{itemize}
-	\item XXX
-	\item YYY
-	\item ZZZ
-	\item ...
-\end{itemize}
-
-\paragraph{Recommendation Algorithm.} Given the library $\{ s_1,\ldots, s_n \}$ of sensitivity policies, the recommendation which (type of) sensitivity to add is based on simulating the effects of the different policies $s_i$ w.r.t. a fully concrete points-to graph computed dynamically. Policy $s$ is considered better than $s'$ if XXX.
-
-The motivation for using dynamic analysis is to be able to quantify the precision loss, or ambiguity, introduced by a given policy. That is, we can reason fully precisely about the concrete points-to facts that are smushed together due to a given policy.
-
-To compute the points-to graph dynamically, we instrument the JavaScript program. This is done via XXX. The instrumented program is, on average, xYYY slower compared to the original version. We handle XXX...
-
-For the example in Figure \ref{fig:jquery-extracted}, our solution correctly picks ...
-
-
-
-
-proceeds by instrumenting the subject program to record, at runtime, the concrete --- and thus fully precise --- points-to graph $G^c$. The question of which sensitivity to recommend to the analysis designer then 
-
-
-
-\subsection{Motivating Example}
-In this section, we would like to use a code example (or a series of examples; see below) to demonstrate the difficulties to (manually) find the performance bottleneck of a static analysis. For example, Figure \ref{fig:jquery-orig} shows the original {\tt extend} function of jQuery whose behavior is not easy to understand; moreover, due to its usage of complicated program structures (e.g., recursion, function variadicity), it is difficult for an analysis to accurately model the results of this function (confirmed in \cite{}). In \cite{}, the authors had to manually transform this function to simplify its structure, resulting in the code in Figure \ref{fig:jquery-modified}. Nevertheless, the transformed code, in and of itself, is still insufficient for a field-sensitive analysis to complete analyzing simple jQuery applications. Therefore, the authors of \cite{} designed an automatic function extraction algorithm (correlation extraction) and used argument sensitivity to improve the performance and precision of JavaScript points-to analysis. The code that is actually being analyzed by the argument-sensitive analysis is presented in Figure \ref{fig:jquery-extracted}. Overall, the take-away message shall be: it is difficult to locate the analysis bottleneck and it is also difficult to find a solution to improve the analysis. This series of examples strongly support the above statement: (1) among almost 9,000 lines of code of jQuery library, it usually is clueless to know that one particular function results in the analysis performance bottleneck (without investigating the code); (2) even if the analysis designer is able to locate this function as the bottleneck, it is difficult to tell which program structure or if it is the combination of several program structures that result in bad analysis behavior, thus making it difficult to develop new technology to improve the analysis; (3) even if the analysis designer is able to (manually) abstract away several challenges (e.g., the transformed function in Figure \ref{fig:jquery-modified}), and wants to apply the more precise technique whole program (e.g., argument sensitivity), this may in turn results in overhead because the other portion of the program may not benefit from the more advanced technique (although this particular function will significantly benefit from argument sensitivity). ({\bf Comment from Shiyi: despite that I think this is a good series examples as motivation, we cannot afford to use too much space for the codes; simplify the code, especially Figure 1 (included the complete code for your reference), as the ECOOP 12 paper did; or use one whole example to demonstrate what we want to express. Also, note that our technique does not automatically fixes the issues discussed in (1) and (2) above, while we do locate the bottleneck function and apply the advanced techniques, thus solving problem (3) above.}).
-
-\begin{figure}[th!]
-        \lstinputlisting{jquery-orig.js}
-\caption{\textmd{Original {\tt extend} function of jQuery 1.6.1.}}
-\label{fig:jquery-orig}
-\end{figure}
-
-\begin{figure}[th!]
-        \lstinputlisting{jquery-modified.js}
-\caption{\textmd{Modifed {\tt extend} function of jQuery 1.6.1.}}
-\label{fig:jquery-modified}
-\end{figure}
-
-\begin{figure}[th!]
-        \lstinputlisting{jquery-extracted.js}
-\caption{\textmd{Mofified {\tt extend} function with correlation extraction \cite{} of jQuery 1.6.1}}
-\label{fig:jquery-extracted}
-\end{figure}
-
-\subsection{Static Points-to Analysis Behavior (Empirical Study)}
-To (manually or automatically) understand and debug the performance and precision issues associated with static points-to analysis, it is important to know its behavior (normal and abnormal). We present some data to characterize the points-to analysis behavior.
-
-1. growth of points-to graph size (points-to edges) during points-to analysis lifetime. Figure \ref{fig:pts-growth} shows the growth rate of two points-to analyses on an application that invokes jQuery 1.6.1 library. The bad points-to analysis is the baseline analysis (i.e., 0-1-cfa) which could not finish under limited time budget (10 minutes); the good points-to analysis is a 1-cfa and argument-sensitive which finishes analyzing the program in less than 5 seconds and the total number of points-to iteration is about 118,000. Comparing the life time of the bad (part of its lifetime as its lifetime could be much longer) and the good points-to analysis, we observe the growth rate of points-to size (i.e., we count the total number of points-to edges in the graph every 5000 iterations) of good points-to analysis is steady while the bad points-to analysis has ``jumps" (indicating the approximation and "pollution" of points-to results). This finding motivated us to design heuristics to decide when we would like to perform the automatic diagnostic analysis for a bad analysis (i.e., when the slope of growth significantly change). ({\bf Comment by Shiyi: the data of Figure \ref{fig:pts-growth} is included in section2-results.xlsx. I think this is interesting and we may need one more figure on other programs to better support our argument.})
-
-\begin{figure}[th!]
-        \includegraphics[width=0.95\columnwidth]{pts-growth}
-\caption{\textmd{Characteristics of points-to size growth.}}
-\label{fig:pts-growth}
-\end{figure}
-
-2. Points-to size (per pointer key) distribution. See section2-results.xlsx for the data (columns I and J). The data show very interesting and different characteristics of points-to size distribution between a good and bad points-to analyses (the same analyses as in Figure \ref{fig:pts-growth}). We collected this data for each analysis after 100,000 iterations. I think we are looking for a frequency graph here that x axis represents the size of points-to size and y axis represents the number of pointer keys with the specific size of points-to set. Roughly looking at the data, for example in column I (the good points-to analysis), the curve is likely to evenly going down with the increase of points-to size. While for the bad points-to analysis (column J), the curve seems evenly going down with the increase of points-to size until the size of 33; after 33, the next size jumps to 150, and there are a lot of pointer keys with points-to size greater than 150 (thus, the frequency graph/curve/histogram would grow after specific number for the bad analysis). This result is interesting in that this indicates for a bad points-to analysis, some approximate results polluted a lot of places in the graph; thus making the analysis unscalable and extremely imprecise. ({\bf Comment by Shiyi: I can use excel to generate the frequency graph, but it may take some time for me to do so, but I do think this result is interesting to report because the "outliers" (i.e., many pointer keys with large points-to size) in the bad points-to graph indicate how the bottleneck can pollute the analysis and that motivates us find the bottleneck. Furthermore, taking close look at the "large" points-to sizes, many pointer keys share the same points-to sizes, indicating that many could be copies from previously approximate results; thus being "polluted" after copying. This finding motivates us to track the copies of points-to sets during the diagnosis.})
-
-3... We may think of more to report on points-to analysis characteristics. We shall focus on the characteristics that distinguish the good and bad points-to analysis. More data make this subsection an empirical study of static points-to analysis behavior and characterization of good/bad points-to analysis, which in and of itself is a good effort and something new to present, thus making it a contribution of this paper.
-
-({\bf Further comments on Section 2 by Shiyi: I think with the empirical study, this section can be long, but it is Ok as we already are presenting new observations and findings in this section. These new findings very well serve the motivation and design guidance of our algorithm; thus very tightly connected to the rest of the paper.})
-
-\section{Overview \& Design}
-
-\section{Implementation}
-
-\section{Evaluation}
-
-\section{Related Work}
+\input{related}
 
 \section{Conclusions}
+
+\bibliographystyle{abbrv}
+\bibliography{main}
 
 \end{document}
