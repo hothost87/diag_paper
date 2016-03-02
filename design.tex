@@ -7,13 +7,74 @@
 \label{fig:overview}
 \end{figure}
 
+{\bf Algorithms.}
+
+\begin{algorithm}[th!]
+\begin{algorithmic}[1]
+{
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\REQUIRE {\tt config}: analysis configuration
+\REQUIRE {\tt i}: evaluation interval
+\ENSURE {\tt R}: set of root causes
+\STATE {\tt sys} $\leftarrow$ initialize propagation system with {\tt Config}
+\WHILE{({\tt c} $\leftarrow$ next constraint in {\tt sys}) != NULL //fixed-point has not been reached} 
+%\STATE {\tt pts} $\leftarrow$ points-to propagation on {\tt c}
+\FOR{each points-to assignment {\tt v1 = v2} from {\tt c}}
+\STATE {\tt pts\textsubscript{v1}= pts\textsubscript{v1} $\bigcup$ pts\textsubscript{v2}} //points-to propagation
+\STATE {\tt l\textsubscript{v1} = l\textsubscript{v1} $\bigcup$ l\textsubscript{v2} $\bigcup$ \{v2\}} //label propagation
+\ENDFOR
+\IF{{\tt (k $\leftarrow$ No. of evaluations) mod i = 0}}
+\STATE  grow $\leftarrow$ points-to size growth in past {\tt i} evaluations
+\IF{grow > threshold //to perform localization when the growth rate is high}
+\STATE g $\leftarrow$ intermediate points-to graph with labels //do not require a complete graph
+\FOR{each pointer key node {\tt n} in {\tt g}}
+\STATE impact\textsubscript{n} $\leftarrow$ compute the impact of {\tt n} on {\tt g}
+\ENDFOR
+\STATE V $\leftarrow$ nodes with high impacts
+\RETURN
+\ENDIF
+\ENDIF
+\ENDWHILE
+}
+\end{algorithmic}
+\caption{Root cause localization workflow.}
+\label{alg:localization}
+\end{algorithm}
+
+\begin{algorithm}[th!]
+\begin{algorithmic}[1]
+{
+\renewcommand{\algorithmicrequire}{\textbf{Input:}}
+\renewcommand{\algorithmicensure}{\textbf{Output:}}
+\REQUIRE {\tt R = \{r\textsubscript{1}, ..., r\textsubscript{n}\}}: root causes
+\REQUIRE: {\tt t}: dynamic trace
+\ENSURE {\tt <V, S>=\{(r\textsubscript{1}, s\textsubscript{1}),...,(r\textsubscript{n}, s\textsubscript{n})\}}: suggestions
+\STATE G $\leftarrow$ taking {\tt t} as input, create a set of dynamic points-to graphs with different context sensitivity policies //some operations from Procedure 3 may be moved here
+\FOR{each {\tt r\textsubscript{i}} $\in$ {\tt R}}
+\STATE A\textsubscript{<r\textsubscript{i}, G>} $\leftarrow$ $\emptyset$ 
+\FOR{each {\tt g\textsubscript{j}} $\in$ {\tt G}}
+%\STATE |pts\textsubscript{(r, g)}| $\leftarrow$ query {\tt r}'s total points-to size in {\tt g}
+%\STATE |cs\textsubscript{(r, g)}| $\leftarrow$ query number of calling contexts for {\tt r} in {\tt g}
+\STATE a\textsubscript{<r\textsubscript{i}, g\textsubscript{j}>} $\leftarrow$ query {\tt r\textsubscript{i}}'s total points-to size in {\tt g\textsubscript{j}} and measure its accuracy corresponding to {\tt g\textsubscript{j}}'s context sensitivity policy
+\STATE A\textsubscript{<r\textsubscript{i}, G>} = A\textsubscript{<r\textsubscript{i}, G>} $\bigcup$ \{a\textsubscript{<r\textsubscript{i}, g\textsubscript{j}>}\}
+\ENDFOR
+\STATE a\textsubscript{<r\textsubscript{i}, g>} $\leftarrow$ min(A\textsubscript{<r\textsubscript{i}, G>}) //pick the dynamic points-to graph on which r\textsubscript{i} is the most accurate
+\STATE <V, S> = <V, S> $\bigcup$ \{<r\textsubscript{i}, g's context sensitivity>\}
+\ENDFOR
+}
+\end{algorithmic}
+\caption{Improvement suggestion workflow.}
+\label{alg:suggestion}
+\end{algorithm}
+
 \subsection{Overview}
 
 {\bf TODO: re-order the boxes in Figure \ref{fig:overview}.}
 
 Figure \ref{fig:overview} shows an overview of the root cause localization process with the support of our automatic approaches. We first initialize the static analysis with an initial configuration in terms of context sensitivity, which experiences poor performance and/or precision behavior. The initial analysis is performed on the target program under a {\it labeled propagation system} which keeps track of the history of point-to propagations, labeling the origins of the points-to relations. Moreover, instead of waiting until the analysis achieves a fixed-point,\footnote{An analysis that experiences scalability issues on a program often cannot achieve the fixed-point within the time budget. This design allows us performing root cause localization on intermediate states during the points-to propagations.} we periodically pause the propagation system to evaluate the intermediate states. Heuristics are used to decide whether to perform {\it root cause localization} (i.e., when the abnormal behavior is observed); if not, the points-to propagations are resumed. The root cause localization identifies a set of variables and/or reference properties in the program as root causes of imprecision, using the points-to analysis history information collected by the labeled propagation system. The algorithm ranks the results in order of their impact to the overall analysis precision and therefore indicating their possibilities of being the root causes.
 
-The optional {\it improvement suggestion} stage takes the localized root causes as inputs to automatically generate suggestions to improve the analysis with specialized context-sensitive analysis. The suggestions are based on the dynamic information. We collect in advance a dynamic trace of the program execution and compute dynamic points-to graphs based on the run-time information with pre-defined context sensitivity. Finally, a user (i.e., program anaysis designer) may manually adjust the analysis configuration based on the localization results and/or the improvement suggestions. Furthermore, the analysis can be re-run under the adjusted configuration to observe if the performance and/or precision issues have been resolved. The same process may be performed multiple times to locate all the root causes and develop a specialized analysis configuration that would result in desired analysis performance and precision.
+The optional {\it improvement suggestion} stage takes the localized root causes as inputs to automatically generate suggestions to improve the analysis with specialized context-sensitive analysis. The suggestions are based on the dynamic information. We collect in advance a dynamic trace of the program execution and compute dynamic points-to graphs based on the run-time information with pre-defined context sensitivity. Finally, a user (i.e., program analysis designer) may manually adjust the analysis configuration based on the localization results and/or the improvement suggestions. Furthermore, the analysis can be re-run under the adjusted configuration to observe if the performance and/or precision issues have been resolved. The same process may be performed multiple times to locate all the root causes and develop a specialized analysis configuration that would result in desired analysis performance and precision.
 
 \subsection{Labeled Propagation System}
 
@@ -95,18 +156,3 @@ First, the target program is executed to collect a dynamic trace, recording the 
 Now that we have obtained the dynamic points-to graphs under different context-sensitive analyses (i.e., 1-CFA, argument-sensitive and context-insensitive). For a variable {\tt v} that is identified as a root cause, we locate its corresponding nodes via its program location in each dynamic points-to graph and collect (i) the number of calling contexts associated with {\tt v}, {\tt |CS|}, and (ii) the sum of points-to sizes under all calling contexts, {\tt $\sum$|P\textsubscript{v}|}. We then count {\tt D\textsubscript{v} = $\sum|P\textsubscript{v}|\over |CS|$}, the average dynamic points-to size per calling context, to measure the accuracy of the points-to relations of {\tt v} under the specific context sensitivity. The context sensitivity under which {\tt D\textsubscript{v}} is the smallest is chosen for the function that contains {\tt v} as the improvement suggestion.
 
 {\bf TODO: discussions on why using dynamic information and the impact of its incompleteness.} 
-
-\begin{comment}
-
-\FOR{each basic block $b$ in $G_{cfg}$}
-\IF{$b$ contains identity-update statement(s)}
-\STATE $partition(b)$
-\ELSE \STATE add $b$ to $G_{ipbg}$
-\ENDIF
-\ENDFOR
-\FOR{each identity-update statement $n$ in $G_{ipbg}$}
-\STATE $FORWARD\_DFS(n)$
-\STATE $BACKWARD\_DFS(n)$
-\ENDFOR
-\STATE $union(G_{ipbg})$
-\end{comment}
