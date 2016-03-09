@@ -137,9 +137,8 @@ stringstyle=\color{green},
 %\crdata{0-12345-67-8/90/01}  % Allows default copyright data (0-89791-88-6/97/05) to be over-ridden - IF NEED BE.
 % --- End of Author Metadata ---
 
-
-
-\title{Title}
+\title{Revamping JavaScript Static Analysis via Localization and Remediation of Root Causes of Imprecision}
+%\title{Revamping JavaScript Static Analysis by Localizing and Remedying Root Causes of Imprecision}
 %\subtitle{[Extended Abstract]
 %\titlenote{A full version of this paper is available as
 %\textit{Author's Guide to Preparing ACM SIG Proceedings Using
@@ -201,6 +200,7 @@ stringstyle=\color{green},
 
 \maketitle
 \begin{abstract}
+The effectiveness of static analysis is challenged by the dynamic features of programming languages such as JavaScript, often resulting in impractical results in terms of performance and precision for specific programs. It is a time-consuming but crucial process during static analysis design to discover the sources of analysis impracticality. We present a systematic support for root-cause localization that focuses on JavaScript points-to analysis. When inspecting the intermediate results, the history information of points-to propagation, obtained through a labeled propagation system, is queried to identify the program pointers that have a big impact on overall analysis performance and/or precision. We also have designed an improvement suggestion algorithm that takes dynamic information as inputs to simulate the benefits of various context-sensitive analyses and recommends the appropriate context sensitivity for the root cause functions. The experimental results on JavaScript library applications show that our root-cause localization algorithm can accurately identify the specific program constructs that render existing static analysis impractical. We also have shown that static analysis applying the context sensitivity based on our improvement suggestion algorithm achieves a good balance between precision and performance for the benchmark programs.
 \end{abstract}
 
 \input{introduction}
@@ -213,7 +213,7 @@ stringstyle=\color{green},
 
 \input{related}
 
-\section{Conclusions}
+\input{conclusion}
 
 \bibliographystyle{abbrv}
 \bibliography{main}

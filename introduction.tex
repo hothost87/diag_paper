@@ -1,59 +1,164 @@
 \section{Introduction}
 \label{intro}
 
-Automated software tools play an important role in improving the quality of real-world software applications, which aim to detect security vulnerabilities, find bugs, and support program understanding, etc. Static program analysis, approximating the program behavior without executing the program, is essential for many automated tools. 
+Dynamic programming languages such as JavaScript are now in widespread 
+use for both client-side and server-side applications, often together with 
+cloud services and/or mobile devices.  The flexibility of these languages,
+for example for building prototypes, is key to their popularity, but their
+dynamic nature presents real challenges to static program analyses.  These challenges
+affect analyses used to ensure the security of applications 
+(e.g., integrity and confidentiality of data), to optimize code for 
+good performance and to aid maintenance programmer understanding of 
+code in need of updating. For example, JavaScript allows object property accesses as associative arrays
+where the property name may be set as a result of execution. Making assumptions more accurate than worst-case in this case may be difficult. Moreover, JavaScript supports multiple programming paradigms including object-oriented, functional and procedural programming. Each programming paradigm requires specialized techniques for accurate analysis. These are 
+examples of how JavaScript properties render accurate static analysis 
+very difficult for many real-world programs.
+
+\begin{comment}
+JavaScript allows program constructs 
+to generate code at runtime and then execute this code (i.e., effectively dynamic 
+program construction), which must be considered by a sound static analysis. 
+Making assumptions more accurate than worst-case in these
+circumstances may be difficult. 
+Moreover, JavaScript supports object property accesses as associative arrays
+where the property name may be set as a result of execution. In this case too,
+analysis accuracy requires better than worst-case approximation.  These are 
+examples of how JavaScript properties render accurate static analysis 
+very difficult for many real-world programs.
+\end{comment}
+
+The effectiveness of a static analysis often is evaluated
+as a combination of its precision (i.e., low false positive rate)
+and performance (i.e., efficiency in a limited time/space budget). 
+Often with complex, medium-sized JavaScript programs, especially those 
+using real-world libraries such as {\it jQuery}, static analysis cannot 
+reach a useful solution within a reasonable time budget despite recent progress 
+on improving the state-of-the-art (e.g., \cite{Sridharan:2012:CTP:2367163.2367191, Andreasen:2014:DSA:2660193.2660214, DBLP:conf/ecoop/WeiR15, DBLP:conf/ecoop/ParkR15}). 
+Often it is even difficult to obtain a good approximation of the program 
+call graph. 
+
+We present a new approach to tackle this problem in JavaScript programs.
+When applying an impractical static call graph construction and points-to analysis algorithm to the program, extra information about 
+points-to propagation is gathered in the points-to graph under construction.
+Note that the accuracy of the points-to graph of the objects at call sites directly determines the accuracy
+of the call graph.
+A heuristic process observes the analysis propagation phase
+in order to catch anomalous behavior (i.e., when the analysis is 
+becoming too approximate through propagation of inaccuracy). 
+A diagnosis algorithm is applied to trace this ``bad'' behavior 
+back to its root causes, which when found, present function calls for which 
+judicious application of specific context sensitivity policies will circumvent 
+the anomalous behavior after analysis restart. This process utilizes
+dynamic analysis results in addition  to the static analysis 
+self-inspection to help choose the kinds of context sensitivity to propose.
+We call this entire process {\it root-cause localization}
+and it is crucial for designing effective, new static analysis algorithms
+for JavaScript.
+\begin{comment}
+Thus, our contribution described in this paper
+is (i) a semi-automated process for root-cause  localization
+to help apply static analysis effectively to real-world Javascript programs,
+and (ii) convincing empirical results of applying this process to two
+benchmark suites of JavaScript codes, in cases allowing formerly
+runaway static analyses of several programs to complete and 
+offer a safe static solution.
+\end{comment}
+
+%BGR I am not sure how repetitive this following paragraph
+%is with respect to the previous overview paragraph.
+More specifically, the systematic support for root-cause localization
+focuses on points-to analysis, an enabling static
+analysis for various automated software tools. For an
+unscalable and/or too imprecise static points-to analysis on a
+target program, we keep track of the history information in
+the propagation system, labeling the origins of the points-to
+relations. By examining the analysis propagation as 
+it is performed, heuristics can be applied to decide when to
+perform root-cause localization (i.e., when the analysis
+result is becoming anomalous). Our automatic root-cause
+localization uses the intermediate points-to results and the
+additional labels to identify the variables and/or properties
+that have a big impact on overall analysis precision and
+performance as the {\it root causes}. In addition, we have designed
+an automatic approach that suggests specialized techniques
+for improving analysis precision at these critical program
+constructs. Using a dynamic trace of program execution,
+we build a set of dynamic points-to graphs using various kinds
+of context sensitivity; the idea is that the dynamic points-to graphs
+can simulate the possible effects of a particular kind of 
+context sensitivity to be used at the root cause function
+in the re-started analysis.
+
+This automatic root-cause localization relieves a static
+analysis designer from the chores of manually inspecting the program and
+the analysis implementation to understand the sources of imprecision.
+Moreover, the automatic improvement suggestion
+provides possible context-sensitive analysis choices that may significantly improve
+the overall analysis performance and precision. The specialized
+analysis configurations derived from the results of our
+approach, with possible adjustment from the static analysis
+designer, can be executed on the same program to observe if
+the performance and/or precision issues have been resolved.
+If necessary, the same process can be iteratively performed
+to locate sufficiently many of the sources of imprecision in the analysis 
+for the target program to achieve the desired accuracy and performance.
+In support of this approach, we have conducted experiments to evaluate
+the accuracy of the automatic root-cause location and the subsequent
+improvement suggestions on real-world JavaScript libraries and applications.
+
+The major contributions of this work are:
+
+\begin{itemize}
+\item We present the {\it first research}  that focuses on supporting
+static analysis design with automatic root-cause localization,
+identifying the sources of imprecision that have a 
+big impact on analysis precision and performance.
+
+\item Our approach is the {\it first} to use 
+dynamic information to automatically suggest the kind of context sensitivity
+needed for significant precision improvement on identified root causes
+of analysis inaccuracy.
+
+\item We present an evaluation of the proposed approaches on several benchmarks. 
+The experimental results on JavaScript library applications demonstrate that our root-cause localization algorithm accurately identifies the program constructs that cause an initial static analysis not finishing in a 10 minute time allotment, applying specialized context sensitivity on which significantly improves the analysis performance. The results on JavaScript benchmarks also show a context-sensitive analysis that selectively applies the recommended context sensitivity from our automatic improvement suggestion achieves a much better balance between precision and performance compared to both an imprecise and an expensive analysis.
+
+%including some for which static analysis initially did not finish in a 10 minute
+%time allotment.  These experiments illustrated the effectiveness of the automatic
+%root-cause localization. (TODO: add concrete results.)
+\end{itemize}
+
+In Section \ref{background}, we motivate this project using empirical results and an example.
+Section \ref{design} presents an overview of the
+process. Sections \ref{Se:RootCause} and \ref{Se:suggestion} describe the details of root-cause
+localization and improvement suggestion algorithms, respectively.
+Section \ref{evaluation} presents experimental results. Section \ref{related}
+discusses related work and Section \ref{concl} offers our conclusions.
+
+\begin{comment}
+Automated software tools play an important role in improving the quality of real-world software applications, which aim to detect security vulnerabilities, find bugs, and support program understanding, etc. Static program analysis, approximating the program's behavior without executing the program, is essential for many automated tools. 
 %For example, static taint analysis that tracks the flow from tainted variables to the sensitive operations is widely used in security tools for detecting potential vulnerabilities in the programs (e.g., \cite{Tripp:2009:TET:1542476.1542486}).
 
 The effectiveness of a static analysis, which often is evaluated as a combination of its precision and performance, determines the usefulness of the software tool. A useful static analysis tool needs to achieve a good balance between precision (e.g., low false positive rate) and performance (e.g., completing the analysis under a limited time/space budget). Unfortunately, it is difficult to design effective static analysis techniques due to the challenges of accurately approximating the behavior of specific language features. A dynamic programming language such as JavaScript is often associated with several challenging features. For example, JavaScript allows program constructs to generate code at runtime and supports object property accesses as associative arrays. Therefore, despite the progress on improving the state-of-the-art (e.g., \cite{Sridharan:2012:CTP:2367163.2367191,DBLP:conf/ecoop/WeiR14,Andreasen:2014:DSA:2660193.2660214,DBLP:conf/ecoop/ParkR15}), static analysis still experiences performance and precision problems when analyzing real-world websites that use JavaScript libraries (e.g., {\it jQuery}).
 
-An important stage of static analysis design is to understand the causes of an existing analysis producing unexpected results. Specifically, if the root causes of precision and/or performance loss of a static analysis tool are located, new analysis techniques that accurately handle these program constructs can be designed. Similar to fault localization for software debugging, {\it root cause localization} is a crucial stage for designing effective new static analysis algorithms, which is also a time-consuming and complex process. While automatic fault localization techniques have been extensively studied \cite{Jones:2005:EET:1101908.1101949}, it lacks tool support for locating root causes of analysis imprecision, requiring extensive experience of static analysis design as well as deep understanding of the target programs. Therefore, we are motivated to develop new techniques to assist in root cause localization by automating part of the process of identifying the sources of analysis imprecision.
+An important stage of static analysis design is to understand the causes of an existing analysis producing unexpected results. Specifically, if the root causes of precision and/or performance loss of a static analysis tool are located, new analysis techniques that accurately handle these program constructs can be designed. Similar to fault localization for software debugging, {\it root-cause localization} is a crucial stage for designing effective new static analysis algorithms, which is also a time-consuming and complex process. While automatic fault localization techniques have been extensively studied \cite{Jones:2005:EET:1101908.1101949}, it lacks tool support for locating root causes of analysis imprecision, requiring extensive experience of static analysis design as well as deep understanding of the target programs. Therefore, we are motivated to develop new techniques to assist in root-cause localization by automating part of the process of identifying the sources of analysis imprecision.
 
-In this paper, we present a systematic support for root cause localization. We focus on points-to analysis, an enabling analysis for various automated software tools. For an unscalable and/or imprecise static points-to analysis on a target program, we keep track of the history information in the propagation system, labeling the origins of the points-to relations. Heuristics are then applied to decide when to perform root cause localization. Our automatic root cause localization uses the intermediate points-to results and the additional labels to identify the variables and/or properties that have a big impact on the overall analysis precision and performance as the root causes.
+In this paper, we present a systematic support for root-cause localization. We focus on points-to analysis, an enabling analysis for various automated software tools. For an unscalable and/or imprecise static points-to analysis on a target program, we keep track of the history information in the propagation system, labeling the origins of the points-to relations. Heuristics are then applied to decide when to perform root-cause localization. Our automatic root-cause localization uses the intermediate points-to results and the additional labels to identify the variables and/or properties that have a big impact on the overall analysis precision and performance as the root causes.
 
 In addition to localize the root causes, we have designed an automatic approach that suggests specialized techniques for improving the analysis precision on these critical program constructs. Dynamic points-to graphs with various context sensitivity are built based on a dynamic trace of the program. Because the points-to results of the root causes queried on the dynamic points-to graphs simulate the benefits of the context sensitivity, the suggestions of specialized context sensitivity for specific functions are based on this dynamic information.
 
-The automatic root cause localization relieve the static analysis designer from manually inspecting the program and the analysis implementation to understand the sources of imprecision. Moreover, the automatic improvement suggestion provides possible solutions that may significantly improve the overall analysis performance and precision. The specialized analysis configurations derived from the results of our approaches with possible adjustment from the static analysis designer can be executed on the same program to observe if the performance and/or precision issues have been resolved. If necessary, the same process can be iteratively performed to locate all the sources of imprecision in the analysis for the target program. We have conducted experiments to evaluate the accuracy of the automatic root cause location and improvement suggestions on real-world JavaScript libraries and applications.
+The automatic root-cause localization relieve the static analysis designer from manually inspecting the program and the analysis implementation to understand the sources of imprecision. Moreover, the automatic improvement suggestion provides possible solutions that may significantly improve the overall analysis performance and precision. The specialized analysis configurations derived from the results of our approaches with possible adjustment from the static analysis designer can be executed on the same program to observe if the performance and/or precision issues have been resolved. If necessary, the same process can be iteratively performed to locate all the sources of imprecision in the analysis for the target program. We have conducted experiments to evaluate the accuracy of the automatic root-cause location and improvement suggestions on real-world JavaScript libraries and applications.
 
 The major contributions of this work are:
 
 \begin{itemize}
 
-\item We present the first work that focuses on supporting static analysis design with automatic root cause localization, identifying the sources of imprecisions that have a big impact on the analysis precision and performance.
+\item We present the first work that focuses on supporting static analysis design with automatic root-cause localization, identifying the sources of imprecisions that have a big impact on the analysis precision and performance.
 
 \item We present a general idea that uses the dynamic information to automatically suggest the context sensitivity for significant precision improvement on identified root causes.
 
-\item We have conducted empirical evaluation of the proposed approaches and illustrated the effectiveness of automatic root cause localization. {\bf TODO: add concrete results.}
+\item We have implemented and evaluated the proposed approaches and illustrated the effectiveness of automatic root-cause localization. {\bf TODO: add concrete results.}
 
 \end{itemize}
 
-In Section \ref{background}, we use empirical results and an example to motivate this work. Section \ref{design} presents an overview of the scenario and the detailed discussions on each automatic component. Section \ref{evaluation} presents experimental results. Section \ref{related} further discusses related work and Section 6 offers conclusions.
-
-\begin{comment}
-1. Aspects of software engineering benefit from automated tools.
-
-2. Static analysis is essential for automated tools.
-
-3. Static analysis design is difficult and is hard to write "good" static analysis, because static analysis needs to be specially designed for features. (examples of bad analyses)
-
-4. One most time-consuming process during program analysis design is localization bottlenecks. It requires expertise, understanding of the code, etc. (like what the fault localization phase for debugging).
-
-5. Despite of the importance, this process lacks tool support. motivated us to design automatics approaches for this process.
-
-6. The goals: (i)identifies the root causes of analysis imprecision and performance badness, (ii) limited suggestion improvement.
-
-7. focus on static points-to analysis; the root causes are identified as variables/properties; the improvements are context sensitivity.
-
-8. summary of approaches: (i) labeled propagations system for history info; (ii) root cause localizations with heuristics; (iii) improvement suggestion via dynamic information. Finally, we have conducted evaluations on the approaches.
-
-9. Major contributions:
-
-\begin{itemize}
-
-\item We present the first work that focuses on supporting static analysis design with automatic bottleneck localization, a time-consuming process. Identify root causes of imprecision, and therefore the impact on performance.
-
-\item We present a general idea that uses the dynamic information to automatically suggest the context sensitivity for significant precision improvement on identified analysis bottlenecks.
-
-\item We have conducted empirical evaluation of the proposed approaches and illustrated the effectiveness of automatic bottleneck localization. concrete data.
-
-\end{itemize}
+In Section \ref{background}, we use empirical results and an example to motivate this work. Section \ref{design} presents an overview of the process. Sections \ref{Se:RootCause} and \ref{Se:suggestion} describe the details of root-cause localization and improvement suggestion algorithms, respectively. Section \ref{evaluation} presents experimental results. Section \ref{related} discusses related work and Section 6 offers conclusions.
 \end{comment}
